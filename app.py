@@ -13,6 +13,7 @@ from supabase import create_client, Client
 import json
 from typing import Optional
 import uuid
+import plotly.express as px
 
 # Page config
 st.set_page_config(
@@ -881,7 +882,31 @@ elif st.session_state.page == 'Attendance Report':
                     if len(filtered_df) > 0:
                         attendance_rate = (present_count / (present_count + absent_count)) * 100 if (present_count + absent_count) > 0 else 0
                         st.metric("Attendance Rate", f"{attendance_rate:.1f}%")
-                
+
+                # ⬇️ INSERT CHART CODE HERE
+                import plotly.express as px
+
+                if not filtered_df.empty:
+                    chart_df = filtered_df.copy()
+                    chart_df['check_in_date'] = pd.to_datetime(chart_df['check_in_date'], errors='coerce')
+                    chart_data = chart_df.groupby(['check_in_date', 'status']).size().reset_index(name='count')
+                    fig_bar = px.bar(chart_data, x='check_in_date', y='count', color='status',
+                                    barmode='group', title='📅 Attendance Overview by Date')
+                    st.plotly_chart(fig_bar, use_container_width=True)
+
+                    status_counts = filtered_df['status'].value_counts().reset_index()
+                    status_counts.columns = ['status', 'count']
+                    fig_pie = px.pie(status_counts, values='count', names='status',
+                                    title='🎯 Attendance Status Distribution')
+                    st.plotly_chart(fig_pie, use_container_width=True)
+
+                # Display table
+                if not filtered_df.empty:
+                    st.dataframe(filtered_df, use_container_width=True)
+                else:
+                    st.info("No records found with the selected filters.")
+
+                                
                 # Display table
                 if not filtered_df.empty:
                     st.dataframe(filtered_df, use_container_width=True)
