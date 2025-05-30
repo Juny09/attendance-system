@@ -598,51 +598,51 @@ if capture_method == "Upload Images":
         else:
             st.error(f"Failed to update database: {message}")
 
-elif capture_method == "Use Webcam (local only)":
-    if st.button("Start Photo Capture"):
-        cap = cv2.VideoCapture(0)
+    elif capture_method == "Use Webcam (local only)":
+        if st.button("Start Photo Capture"):
+            cap = cv2.VideoCapture(0)
 
-        img_counter = 0
-        max_images = 50
-        capture_interval = 0.1  # seconds
+            img_counter = 0
+            max_images = 50
+            capture_interval = 0.1  # seconds
 
-        progress_bar = st.progress(0)
-        status_text = st.empty()
-        photo_placeholder = st.empty()
+            progress_bar = st.progress(0)
+            status_text = st.empty()
+            photo_placeholder = st.empty()
 
-        start_time = time.time()
+            start_time = time.time()
 
-        while img_counter < max_images:
-            ret, frame = cap.read()
-            if not ret:
-                break
+            while img_counter < max_images:
+                ret, frame = cap.read()
+                if not ret:
+                    break
 
-            elapsed_time = time.time() - start_time
-            if elapsed_time >= capture_interval:
-                resized_frame = cv2.resize(frame, (450, 450))
+                elapsed_time = time.time() - start_time
+                if elapsed_time >= capture_interval:
+                    resized_frame = cv2.resize(frame, (450, 450))
 
-                file_path = f"data/user.{student_id}.{img_counter+1}.jpg"
-                cv2.imwrite(file_path, resized_frame)
+                    file_path = f"data/user.{student_id}.{img_counter+1}.jpg"
+                    cv2.imwrite(file_path, resized_frame)
 
-                img_counter += 1
-                progress_bar.progress(img_counter / max_images)
-                status_text.text(f"Captured {img_counter}/{max_images} photos")
-                photo_placeholder.image(resized_frame, channels="BGR", width=200)
+                    img_counter += 1
+                    progress_bar.progress(img_counter / max_images)
+                    status_text.text(f"Captured {img_counter}/{max_images} photos")
+                    photo_placeholder.image(resized_frame, channels="BGR", width=200)
 
-                start_time = time.time()
+                    start_time = time.time()
 
-        cap.release()
+            cap.release()
 
-        update_data = {
-            'photo_status': 'Yes',
-            'updated_at': datetime.now().isoformat()
-        }
-        success, message = update_student(student_id, update_data)
+            update_data = {
+                'photo_status': 'Yes',
+                'updated_at': datetime.now().isoformat()
+            }
+            success, message = update_student(student_id, update_data)
 
-        if success:
-            st.success("Photo capture completed! Photos saved successfully.")
-        else:
-            st.error(f"Photos saved but failed to update database: {message}")
+            if success:
+                st.success("Photo capture completed! Photos saved successfully.")
+            else:
+                st.error(f"Photos saved but failed to update database: {message}")
 
 # Train Model Page
 elif st.session_state.page == 'Train Model':
